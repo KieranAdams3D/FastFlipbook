@@ -1,15 +1,21 @@
+import hou
 from PySide2 import QtGui, QtCore, QtWidgets
 from PySide2.QtCore import QFile
 from PySide2.QtUiTools import *
+
 import os, subprocess, re, tempfile, shutil, requests, json, math
 
-class FastFlipbook(QtWidgets.QDialog):
+class main(QtWidgets.QDialog):
     def __init__(self):
         # Init UI
-        super(FastFlipbook, self).__init__()
+        super(main, self).__init__()
 
         loader = QUiLoader()
-        file = QFile(r"P:\all_work\userNames\ka23aaw\Sandbox\Tools\Flippy\Fast_Flipbook_Dialogue_003.ui")
+
+        self.install_dir = os.path.dirname(os.path.abspath(__file__))
+        ui_path = os.path.join(self.install_dir, "FastFlipbook.ui")
+
+        file = QFile(ui_path)
         file.open(QFile.ReadOnly)
         self.ui = loader.load(file)
         file.close()
@@ -41,9 +47,9 @@ class FastFlipbook(QtWidgets.QDialog):
         self.ui.PB_compare.pressed.connect(self.compareVideos)
 
     def initVariables(self):
-        self.ffmpeg_path = r"C:\Program Files\Side Effects Software\Houdini 20.5.584\bin\hffmpeg.exe"
-        self.hip = hou.expandString('$HIP')
-        self.file_name = hou.expandString('$HIPNAME')
+        self.ffmpeg_path = os.path.join(hou.text.expandString('$HB'), 'hffmpeg.exe')
+        self.hip = hou.text.expandString('$HIP')
+        self.file_name = hou.text.expandString('$HIPNAME')
 
         self.viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
         self.fb_settings = self.viewer.flipbookSettings()
@@ -69,7 +75,7 @@ class FastFlipbook(QtWidgets.QDialog):
         self.findWebhookKeys()
 
     def findWebhookKeys(self):
-        webhooks_folder = r"P:\all_work\userNames\ka23aaw\Sandbox\Tools\Flippy\FastFlipbook_webhooks.json"
+        webhooks_folder = os.path.join(self.install_dir, "FastFlipbook_webhooks.json")
 
         with open(webhooks_folder, 'r') as file:
             self.webhooks = json.load(file)
@@ -338,4 +344,4 @@ class FastFlipbook(QtWidgets.QDialog):
             
 
 
-tool = FastFlipbook()
+tool = main()
