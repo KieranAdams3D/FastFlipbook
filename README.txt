@@ -1,8 +1,8 @@
-== Fast Flipbook ==
+# Fast Flipbook
 A Houdini tool for speeding up reviews of viewport renders.
 By Kieran Adams
 
-== Description ==
+# Description
 Fast Flipbook aims to improve upon Houdini's default flipbook behaviour by simplifying the interface and exposing common parameters in addition to improving default behaviours through additional quality of life features for artists to use to improve their workflows. It syncs its settings with those existing in Houdini's native flipbook allowing artists to access additional advanced settings in a way they are familiar with and permits seamless switching from the default behaviour to the use of the tool.
 
 The tool exposes frame range and resolution parameters to a simple, clear interface in addition to toggles for maximising the viewport, flipbooking all viewports, saving a .mp4 video of the resulting flipbook, and the option to export resulting videos to a chosen Discord Server through a webhook. When saved, outputs are stored in a '/flipbooks' directory of the $HIP file, their names being tied to the scene file name. The tool automatically versions up the file name to an index above the highest version number scene file in its parent directory to make it easy for artists to return to the state of their scene corresponding to the result of their saved videos.
@@ -11,7 +11,7 @@ Previous saved videos are retrieved from the '/flipbooks' directory upon loading
 
 A major aim of the tool was not requiring additional Python libraries, and so it leverages installed libraries from the Houdini installation for non-default Python libraries, including FFMPEG. The tool requires two supplementary files, its .ui file created with PyQt for its interface and a modifiable configuration file to store Discord webhook URLs with associated names, allowing for the removal and addition of webhooks through modification of a .json file which are recognised by the tool and its interface upon the next time it is used.
 
-== Features ==
+# Features
 - Custom flipbooking interface
 	- Exposed parameters for frequent settings
 	- Non-exposed settings pulled from native interface preserving control
