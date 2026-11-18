@@ -1,3 +1,3 @@
-from . import tools
+from .FastFlipbook import main
 
-__all__ = ["tools"]
+__all__ = ["main"]

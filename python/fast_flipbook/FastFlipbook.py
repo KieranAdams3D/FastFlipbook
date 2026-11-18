@@ -1,23 +1,23 @@
 import hou
-from PySide2 import QtGui, QtCore, QtWidgets
-from PySide2.QtCore import QFile
-from PySide2.QtUiTools import *
+from PySide6 import QtGui, QtCore, QtWidgets
+from PySide6.QtCore import QFile
+from PySide6.QtUiTools import *
 
 import os, subprocess, re, tempfile, shutil, requests, json, math
 
-class main(QtWidgets.QDialog):
+class flipbooker(QtWidgets.QDialog):
     def __init__(self):
         # Init UI
-        super(main, self).__init__()
+        super(flipbooker, self).__init__()
 
         loader = QUiLoader()
 
-        self.install_dir = os.path.dirname(os.path.abspath(__file__))
-        ui_path = os.path.join(self.install_dir, "FastFlipbook.ui")
+        self.utils_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'utils')
+        ui_path = os.path.join(self.utils_dir, "FastFlipbook.ui")
 
         file = QFile(ui_path)
         file.open(QFile.ReadOnly)
-        self.ui = loader.load(file)
+        self.ui = loader.load(file, self)
         file.close()
         
         self.ui.setParent(hou.qt.mainWindow(), self.ui.windowFlags())
@@ -75,7 +75,7 @@ class main(QtWidgets.QDialog):
         self.findWebhookKeys()
 
     def findWebhookKeys(self):
-        webhooks_folder = os.path.join(self.install_dir, "FastFlipbook_webhooks.json")
+        webhooks_folder = os.path.join(self.utils_dir, "FastFlipbook_webhooks.json")
 
         with open(webhooks_folder, 'r') as file:
             self.webhooks = json.load(file)
@@ -256,7 +256,7 @@ class main(QtWidgets.QDialog):
         for item in filenames:
             match = re.fullmatch(pattern, item)
             basename = str(match.group('basename'))
-            print(basename)
+            # print(basename)
             num = str(match.group('version'))
             if item == filenames[0]:
                 output_file_name += basename
@@ -265,7 +265,7 @@ class main(QtWidgets.QDialog):
 
             output_file_name += num
 
-            print(output_file_name)
+            # print(output_file_name)
 
         output_file_name += '_comparison.mp4'
 
@@ -336,12 +336,16 @@ class main(QtWidgets.QDialog):
 
         cmd = f'"{self.ffmpeg_path}" {inputs_string} -filter_complex "{index_string} {index_list_string}xstack=inputs={num_inputs}:layout={layout_string}:fill=black[out]" -map "[out]" -c:v h264_nvenc {output_path}'
 
-        print(os.path.exists(output_path))
+        # print(os.path.exists(output_path))
 
         if not os.path.exists(output_path):
             subprocess.run(cmd, shell=True)
         os.startfile(f'{output_path}')
-            
 
+tool = None
 
-tool = main()
+def main():
+    global tool
+
+    tool = flipbooker()
+    return tool
