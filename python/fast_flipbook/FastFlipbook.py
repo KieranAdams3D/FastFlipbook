@@ -14,6 +14,7 @@ class flipbooker(QtWidgets.QDialog):
 
         self.utils_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'utils')
         ui_path = os.path.join(self.utils_dir, "FastFlipbook.ui")
+        self.threads_path = os.path.join(self.utils_dir, "thread_ids.json")
 
         file = QFile(ui_path)
         file.open(QFile.ReadOnly)
@@ -50,6 +51,7 @@ class flipbooker(QtWidgets.QDialog):
         self.ffmpeg_path = os.path.join(hou.text.expandString('$HB'), 'hffmpeg.exe')
         self.hip = hou.text.expandString('$HIP')
         self.file_name = hou.text.expandString('$HIPNAME')
+        self.project_name = self.file_name.rstrip("1234567890").rstrip("._")
 
         self.viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
         self.fb_settings = self.viewer.flipbookSettings()
@@ -147,6 +149,7 @@ class flipbooker(QtWidgets.QDialog):
         self.fb_settings.output(img_output_path)
 
     def flipbook(self):
+        self.file_name = hou.text.expandString('$HIPNAME')
         self.viewer.flipbook(self.viewer.curViewport(), self.fb_settings)
 
     def saveVideo(self):
@@ -168,11 +171,46 @@ class flipbooker(QtWidgets.QDialog):
         selected_server_index = self.ui.DD_chooseDiscord.currentIndex()
 
         url = list(self.webhooks.values())[selected_server_index]
-
         data = {'content': f'New flipbook from {self.file_name}.\n `{self.output_path}`'}
-        attachments = {"file": open(self.output_path, 'rb')}
 
-        requests.post(url, data, files=attachments)
+        thread_id = self.findDiscordThread()
+        
+        if thread_id != None:
+            # If exists, send with existing id
+            url += f'?thread_id={thread_id}'
+    
+        else:
+            # If does not exist, send with file name and store thread id
+            data['thread_name'] = self.project_name
+    
+        
+        attachments = {"file": open(self.output_path, 'rb')}
+        post = requests.post(url, data, files=attachments).json()
+    
+        if thread_id == None:
+            with open(self.threads_path, 'r') as file:
+                stored_threads = json.load(file)
+                stored_threads[self.project_name] = post['channel_id']
+    
+                file.close()
+    
+            with open(self.threads_path, 'w') as file:
+                json.dump(stored_threads, file)
+    
+                file.close()
+
+    def findDiscordThread(self):
+        # Read existing thread id keys to see if a thread already exists
+        with open(self.threads_path) as file:
+            thread_dict = json.load(file)
+            print(f'initial thread search: {thread_dict}')
+
+            file.close()
+
+            if self.project_name in thread_dict:
+                return thread_dict[self.project_name]
+            else:
+                return None
         
     def checkSceneSaved(self):
         if hou.hipFile.isNewFile():
