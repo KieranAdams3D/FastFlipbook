@@ -51,7 +51,7 @@ class flipbooker(QtWidgets.QDialog):
         self.ffmpeg_path = os.path.join(hou.text.expandString('$HB'), 'hffmpeg.exe')
         self.hip = hou.text.expandString('$HIP')
         self.file_name = hou.text.expandString('$HIPNAME')
-        self.project_name = self.file_name.rstrip("1234567890").rstrip("._")
+        self.project_name = f'{os.path.basename(self.hip)} / {self.file_name.rstrip("1234567890").rstrip("._")}'
 
         self.viewer = hou.ui.paneTabOfType(hou.paneTabType.SceneViewer)
         self.fb_settings = self.viewer.flipbookSettings()
@@ -203,7 +203,6 @@ class flipbooker(QtWidgets.QDialog):
         # Read existing thread id keys to see if a thread already exists
         with open(self.threads_path) as file:
             thread_dict = json.load(file)
-            print(f'initial thread search: {thread_dict}')
 
             file.close()
 
@@ -294,7 +293,7 @@ class flipbooker(QtWidgets.QDialog):
         for item in filenames:
             match = re.fullmatch(pattern, item)
             basename = str(match.group('basename'))
-            # print(basename)
+            
             num = str(match.group('version'))
             if item == filenames[0]:
                 output_file_name += basename
